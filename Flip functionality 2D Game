@@ -1,0 +1,102 @@
+using System.Collections;
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    private Rigidbody2D rb;
+    private Animator anim;
+
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float jumpForce = 10f;
+
+    [Header("Collision Info")]
+    [SerializeField] private float groundCheckDistance = 0.2f;
+    [SerializeField] private LayerMask whatIsGround;
+
+    private float xInput;
+    private bool isGrounded;
+
+    private bool facingRight = true;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponentInChildren<Animator>();
+
+        Debug.Assert(rb != null, "Rigidbody2D is missing!");
+        Debug.Assert(anim != null, "Animator is missing!");
+
+        DebugAnimatorParameters();
+    }
+
+    void Update()
+    {
+
+        HandleInput();
+        CheckGrounded();
+        Move();
+        HandleFlip();
+        UpdateAnimation();
+    }
+
+    private void HandleInput()
+    {
+        xInput = Input.GetAxisRaw("Horizontal");
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+    }
+
+    private void CheckGrounded()
+    {
+        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
+    }
+
+    private void Move()
+    {
+        rb.linearVelocity = new Vector2(xInput * moveSpeed, rb.linearVelocity.y);
+    }
+
+    private void UpdateAnimation()
+    {
+        bool isRunning = Mathf.Abs(rb.linearVelocity.x) > 0.01f;
+        anim.SetBool("isRunning", isRunning);
+        if (anim.HasParameter("xVelocity", AnimatorControllerParameterType.Float))
+            anim.SetFloat("xVelocity", Mathf.Abs(rb.linearVelocity.x));
+    }
+
+    private void HandleFlip()
+    {
+        if (rb.linearVelocity.x < 0 && facingRight || rb.linearVelocity.x > 0 && !facingRight)
+            Flip();
+    }
+
+    private void Flip()
+    {
+        transform.Rotate(0, 180, 0);
+        facingRight = !facingRight;
+    }
+
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
+    }
+
+    private void DebugAnimatorParameters()
+    {
+        foreach (var param in anim.parameters)
+            Debug.Log($"Animator Parameter: {param.name}, Type: {param.type}");
+    }
+}
+
+public static class AnimatorExtensions
+{
+    public static bool HasParameter(this Animator animator, string paramName, AnimatorControllerParameterType type)
+    {
+        foreach (var param in animator.parameters)
+            if (param.type == type && param.name == paramName) return true;
+        return false;
+    }
+}
