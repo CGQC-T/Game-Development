@@ -1,30 +1,33 @@
-using System.Collections.Generic;
-using System.Collections;
+using System.Collections.Generic; 
+using System.Collections; 
 using UnityEngine;
 
-public class 2DPlayerController : MonoBehaviour
+public class PlayerController2D : MonoBehaviour
 {
-    
-    private Rigidbody2D rb;
+    private Rigidbody2D rb; // Reference to the Rigidbody2D component
 
-    [SerializeField] private float moveSpeed;
+    [SerializeField] private float moveSpeed = 5f; // Player's movement speed
 
-    private float xInput;
-    
+    private float xInput; // Store horizontal input
+
     void Start()
     {
+        // Get the Rigidbody2D component attached to this GameObject
         rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
+        // Get horizontal input (-1 for left, 1 for right, 0 for no input)
         xInput = Input.GetAxisRaw("Horizontal");
 
+        // Handle player movement
         HandleMovement();
     }
 
     private void HandleMovement()
     {
-        rb.linearVelocity = new Vector2(xInput * moveSpeed, rb.linearVelocity.y);
+        // Set the Rigidbody2D velocity based on input
+        rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
     }
 }
