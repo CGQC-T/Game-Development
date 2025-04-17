@@ -1,0 +1,9 @@
++listHolidays(in year:integer)
+//แสดงวันหยุดทั้งหมดในหนึ่งปีของ year ให้มา
+	Date = วันที่ของวันแรกของปี
+	while (date ไม่ใช่วันแรกของปีถัดไป){
+		if(date = วันหยุด){
+			write(date + “คือวันหยุด”)
+    } //end if
+  Date = วันที่ถัดไป
+}//end while
